@@ -106,6 +106,10 @@ if __name__ == '__main__':
         '-w, --weight', dest='weight', metavar='WEIGHT', default=20,
         type=int, help='Lookup weight (eg: 20)'
     )
+    parser.add_argument(
+        '-n', metavar='NUMBER', default=0,
+        type=int, help='Generate N sentences (if 0: generates interactively'
+    )
     args = parser.parse_args()
 
     words = WordsDict(args.lookup, args.weight)
@@ -119,11 +123,16 @@ if __name__ == '__main__':
         learn_corpus(words, sys.stdin)
 
     print('Generating...')
-    print('Press ^C or ^D to stop, <enter> to continue')
+    print('Press ^C to stop, <enter> to continue')
 
     try:
-        while True:
-            print(''.join(gen_sentence(words)))
-            input()
+        if args.n:
+            for _ in range(args.n):
+                print(''.join(gen_sentence(words)))
+        else:
+            with open('/dev/tty', 'r') as tty:
+                while True:
+                    print(''.join(gen_sentence(words)))
+                    tty.read(1)
     except (KeyboardInterrupt, EOFError):
         pass
